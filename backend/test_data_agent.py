@@ -32,7 +32,6 @@ def test_pipeline():
                             "comment_count": 500,
                             "share_count": "3.5k",
                             "collect_count": 0,
-                            "play_count": "9000",
                         },
                         "text_extra": [
                             {"hashtag_name": "测试标签1"},
@@ -75,7 +74,6 @@ def test_pipeline():
                             "comment_count": 10,
                             "share_count": 5,
                             "collect_count": 2,
-                            "play_count": 3000,
                         },
                         "text_extra": []
                     }

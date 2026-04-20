@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Databases
+*.db
+*.sqlite3
+
+# Playwright / Browsers
+backend/user_data/
+.playwright/
+test-results/
+
+# Excel Exports
+*.xlsx
+
+# Environment
+.env
+.venv
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Scratch / Test scripts
+test_excel_download.py
+backend/raw_data.json
+C:\Users\Orange Zhouhao Pang\.gemini\antigravity\brain\6ff5a69a-f8f2-467d-a70a-67c75b139205\scratch\

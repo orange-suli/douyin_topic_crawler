@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from backend.spider import run_spider
+from backend.database import export_to_excel
 import sqlite3
 import os
 import asyncio
@@ -72,7 +74,6 @@ def fetch_detailed_videos_query(skip: int, limit: int, keyword: str = None) -> l
                 v.comment_count,
                 v.share_count,
                 v.collect_count,
-                v.play_count,
                 v.search_keyword,
                 v.video_url,
                 a.nickname    AS author_nickname,
@@ -157,7 +158,7 @@ def fetch_stats_query(keyword: str = None):
         scatter_sql = """
             SELECT 
                 v.aweme_id,
-                v.digg_count, v.comment_count, v.share_count, v.collect_count, v.play_count,
+                v.digg_count, v.comment_count, v.share_count, v.collect_count,
                 a.follower_count, a.nickname
             FROM videos v
             INNER JOIN authors a ON v.author_uid = a.uid
@@ -219,7 +220,7 @@ async def get_detailed_videos(
     每条记录包含：
     - `aweme_id`、`title`（视频标题）、`create_time`
     - `tags`（标签数组，已解析）
-    - `digg_count`、`comment_count`、`share_count`、`collect_count`、`play_count`
+    - `digg_count`、`comment_count`、`share_count`、`collect_count`
     - `video_url`（可直接跳转的抖音视频链接）
     - `author_nickname`、`author_uid`、`follower_count`（博主粉丝数）
     - `search_keyword`（来源关键词）
@@ -258,6 +259,28 @@ async def start_crawl(req: CrawlRequest):
     if result.get("status") == "success":
         return {"code": 200, "message": result["message"], "data": result.get("data")}
     raise HTTPException(status_code=500, detail=result.get("message", "未知错误"))
+
+@app.get("/api/download/{keyword}", summary="下载关键字相关的 Excel 数据流")
+async def download_excel(keyword: str):
+    """
+    调用数据库层函数生成该关键字的 Excel，并通过 FileResponse 将附件下载到前端。
+    若需要下载全量数据，可传入 'all' 代替 keyword。
+    """
+    actual_kw = "" if keyword.lower() == "all" else keyword
+    try:
+        file_path = await asyncio.to_thread(export_to_excel, actual_kw)
+        if not file_path or not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="无法导出：没有找到该关键词对应的数据")
+            
+        filename = os.path.basename(file_path)
+        # 返回 Excel 文件流
+        return FileResponse(
+            path=file_path,
+            filename=filename,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"文件导出失败: {str(e)}")
 
 # ── 静态前端文件挂载 ──────────────────────────────────────────────
 # 必须在所有 /api/* 路由注册完毕后再挂载，否则会屏蔽 API 路由

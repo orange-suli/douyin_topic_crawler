@@ -117,8 +117,7 @@ body {
     box-shadow: 0 0 0 2px rgba(79, 172, 254, 0.3);
 }
 
-.btn-primary {
-    background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+.btn-primary, .btn-secondary {
     color: #fff;
     border: none;
     padding: 0.8rem 2rem;
@@ -134,19 +133,29 @@ body {
     min-width: 160px;
 }
 
-.btn-primary:hover {
+.btn-primary {
+    background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+}
+
+.btn-secondary {
+    background: linear-gradient(90deg, #10b981, #059669); /* Green styling for Excel export */
+    border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.btn-primary:hover, .btn-secondary:hover {
     filter: brightness(1.1);
 }
 
-.btn-primary:active {
+.btn-primary:active, .btn-secondary:active {
     transform: scale(0.98);
 }
 
-.btn-primary:disabled {
+.btn-primary:disabled, .btn-secondary:disabled {
     background: #444;
     cursor: not-allowed;
     opacity: 0.7;
     filter: brightness(1);
+    border: none;
 }
 
 .crawl-error {

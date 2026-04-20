@@ -123,7 +123,6 @@ class DataCleaner:
                     'comment_count': DataCleaner._parse_number(stats.get('comment_count')),
                     'share_count': DataCleaner._parse_number(stats.get('share_count')),
                     'collect_count': DataCleaner._parse_number(stats.get('collect_count')),
-                    'play_count': DataCleaner._parse_number(stats.get('play_count')),
                     'tags': tags_str,
                     'search_keyword': search_keyword,
                     'video_url': str(video_url)
@@ -134,7 +133,7 @@ class DataCleaner:
         
         # 兜底空值处理（保证严格的无脏数据）
         if not videos_df.empty:
-            num_cols = ['digg_count', 'comment_count', 'share_count', 'collect_count', 'play_count']
+            num_cols = ['digg_count', 'comment_count', 'share_count', 'collect_count']
             videos_df[num_cols] = videos_df[num_cols].fillna(0).astype(int)
             # video_url 单独处理：用 aweme_id 兜底，不用空字符串
             if 'video_url' in videos_df.columns:

@@ -29,10 +29,13 @@
                 <input type="text" id="crawl-keyword" placeholder="输入搜索关键词..." class="form-input" />
                 <input type="number" id="crawl-limit" value="10" min="1" max="100" placeholder="抓取条数" class="form-input" />
             </div>
-            <button id="crawl-btn" class="btn-primary">
-                <span class="btn-text">🚀 开始抓取</span>
-                <span class="btn-loader hidden">⏳ 抓取分析中...</span>
-            </button>
+            <div class="control-group">
+                <button id="crawl-btn" class="btn-primary">
+                    <span class="btn-text">🚀 开始抓取</span>
+                    <span class="btn-loader hidden">⏳ 抓取分析中...</span>
+                </button>
+                <button id="download-btn" class="btn-secondary" disabled>📦 下载 Excel 报表</button>
+            </div>
             <div id="crawl-error" class="crawl-error hidden"></div>
         </div>
 

@@ -34,7 +34,6 @@ def init_db():
                 comment_count INTEGER,
                 share_count INTEGER,
                 collect_count INTEGER,
-                play_count INTEGER,
                 tags TEXT,
                 search_keyword TEXT,
                 video_url TEXT
@@ -62,7 +61,7 @@ def batch_insert_videos(df: pd.DataFrame):
         return
         
     required_cols = ['aweme_id', 'desc', 'create_time', 'author_uid', 'digg_count', 
-                     'comment_count', 'share_count', 'collect_count', 'play_count', 'tags', 
+                     'comment_count', 'share_count', 'collect_count', 'tags', 
                      'search_keyword', 'video_url']
     
     # 保障列存在且过滤
@@ -105,6 +104,58 @@ def batch_insert_authors(df: pd.DataFrame):
                                  data_iter
                              )
                         )
+
+def export_to_excel(keyword: str) -> str:
+    """从数据库读取关键词数据并导出为 Excel 文件，返回文件绝对路径"""
+    query = """
+        SELECT v.*, a.nickname, a.follower_count 
+        FROM videos v
+        LEFT JOIN authors a ON v.author_uid = a.uid
+    """
+    params = []
+    if keyword:
+        query += " WHERE v.search_keyword = ?"
+        params.append(keyword)
+    
+    # 使用 pd.read_sql_query 读取数据
+    with sqlite3.connect(DB_PATH) as conn:
+        df = pd.read_sql_query(query, conn, params=params)
+    
+    if df.empty:
+        return ""
+
+    # 列名映射为中文，增强 Excel 可读性
+    rename_map = {
+        'aweme_id': '视频ID',
+        'desc': '标题/描述',
+        'create_time': '发布时间',
+        'author_uid': '作者UID',
+        'digg_count': '点赞数',
+        'comment_count': '评论数',
+        'share_count': '分享数',
+        'collect_count': '收藏数',
+        'tags': '标签',
+        'search_keyword': '抓取关键词',
+        'video_url': '详情链接',
+        'nickname': '作者昵称',
+        'follower_count': '作者粉丝数'
+    }
+    df = df.rename(columns=rename_map)
+    
+    # 按互动量（点赞数）降序排列
+    if '点赞数' in df.columns:
+        df = df.sort_values(by='点赞数', ascending=False)
+
+    # 构造绝对路径
+    filename = f"douyin_data_{keyword if keyword else 'all'}.xlsx"
+    export_dir = os.path.dirname(DB_PATH)
+    file_path = os.path.abspath(os.path.join(export_dir, filename))
+    
+    # 写入 Excel
+    df.to_excel(file_path, index=False, engine='openpyxl')
+    
+    print(f"[*] Excel 导出完成: {file_path} (共 {len(df)} 条数据)")
+    return file_path
 
 # 执行初始化
 init_db()

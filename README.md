@@ -18,6 +18,7 @@
 | 📊 **动态看板** | ECharts 5 驱动：互动柱状图 + 标签词云图 + 粉丝-互动率散点图，完全前后端解耦 |
 | 🔄 **一键抓取刷新** | 前端控制面板直接触发 `POST /api/crawl`，完成后自动刷新全部图表 |
 | ✅ **自动化 QA** | `test_runner.py` 覆盖多关键词回归测试与 `limit` 边界值精确断言 |
+| 📅 **Excel 导出** | 支持一键导出结构化数据报表（.xlsx），自动映射中文字段，包含完整互动指标 |
 
 ---
 
@@ -186,6 +187,7 @@ python test_runner.py
 | `GET` | `/api/videos` | 获取视频列表，支持 `keyword`、`skip`、`limit` 分页参数 |
 | `GET` | `/api/videos/detailed` | 获取视频详情列表（含 `video_url`、标签数组、粉丝数） |
 | `GET` | `/api/stats` | 获取看板聚合数据（互动柱状、标签词云、散点图），支持 `keyword` 筛选 |
+| `GET` | `/api/download/{keyword}` | 导出并下载指定关键词（或 `all`）的结构化 Excel 数据报表 |
 
 完整交互式文档请访问：`http://localhost:8000/docs`
 
@@ -205,7 +207,6 @@ python test_runner.py
 | `comment_count` | INTEGER | 评论数 |
 | `share_count` | INTEGER | 转发数 |
 | `collect_count` | INTEGER | 收藏数 |
-| `play_count` | INTEGER | 播放数 |
 | `tags` | TEXT | 话题标签（逗号分隔） |
 | `search_keyword` | TEXT | 来源搜索词 |
 | `video_url` | TEXT | 可跳转的抖音视频链接 |

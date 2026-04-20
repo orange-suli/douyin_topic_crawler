@@ -332,10 +332,6 @@ function renderDetailList(videos) {
                     <span class="stat-icon">⭐</span>
                     <span class="stat-val">${fmtNum(v.collect_count)}</span>
                 </span>
-                <span class="stat-chip" title="播放">
-                    <span class="stat-icon">▶️</span>
-                    <span class="stat-val">${fmtNum(v.play_count)}</span>
-                </span>
             </div>`;
 
         // Follower count
@@ -390,6 +386,11 @@ async function fetchAndRenderDetailList() {
 
         if (json.code === 200) {
             renderDetailList(json.data);
+            // 控制下载按钮状态
+            const downloadBtn = document.getElementById('download-btn');
+            if (downloadBtn) {
+                downloadBtn.disabled = (!json.data || json.data.length === 0);
+            }
         } else {
             throw new Error(json.message || '接口返回异常');
         }
@@ -464,6 +465,20 @@ function setupCrawlButton() {
     });
 }
 
+// Setup Download Control Panel
+function setupDownloadButton() {
+    const btn = document.getElementById('download-btn');
+    const keywordInput = document.getElementById('crawl-keyword');
+
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+        const keyword = keywordInput.value.trim() || 'all';
+        // 构建下载链接，后端会自动生成附件流
+        const downloadUrl = `${API_BASE_URL}/api/download/${encodeURIComponent(keyword)}`;
+        window.open(downloadUrl, '_blank');
+    });
+}
+
 // Resize Charts on Window Resize
 window.addEventListener('resize', () => {
     chartInstances.forEach(chart => {
@@ -474,6 +489,7 @@ window.addEventListener('resize', () => {
 // Bootstrap
 document.addEventListener('DOMContentLoaded', () => {
     setupCrawlButton();
+    setupDownloadButton();
     fetchAndRenderAll();        // charts
     fetchAndRenderDetailList(); // detail list (独立请求，不依赖图表数据)
 });
