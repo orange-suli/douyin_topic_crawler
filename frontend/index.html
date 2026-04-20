@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="抖音抓取与数据分析大屏看板">
+    <title>抖音数据分析看板</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <!-- ECharts WordCloud Extension -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="error-banner" class="banner hidden">
+        <span>数据加载失败，请检查服务状态</span>
+    </div>
+    
+    <div class="dashboard-container">
+        <header class="header">
+            <h1>抖音多维度数据分析看板</h1>
+            <p class="subtitle">互动表现与达人数据洞察屏</p>
+        </header>
+
+        <div class="control-panel glass card">
+            <div class="control-group">
+                <input type="text" id="crawl-keyword" placeholder="输入搜索关键词..." class="form-input" />
+                <input type="number" id="crawl-limit" value="10" min="1" max="100" placeholder="抓取条数" class="form-input" />
+            </div>
+            <button id="crawl-btn" class="btn-primary">
+                <span class="btn-text">🚀 开始抓取</span>
+                <span class="btn-loader hidden">⏳ 抓取分析中...</span>
+            </button>
+            <div id="crawl-error" class="crawl-error hidden"></div>
+        </div>
+
+        <div class="grid-layout">
+            <!-- 互动数据对比图 -->
+            <div class="card glass">
+                <div class="card-header">
+                    <h2>核心互动数据对比图</h2>
+                </div>
+                <div class="chart-container" id="bar-chart" aria-label="Interactive metrics bar chart"></div>
+            </div>
+
+            <!-- 视频标签词云图 -->
+            <div class="card glass">
+                <div class="card-header">
+                    <h2>热门标签分布词云</h2>
+                </div>
+                <div class="chart-container" id="wordcloud-chart" aria-label="Tags word cloud"></div>
+            </div>
+
+            <!-- 粉丝数与互动率的散点图 -->
+            <div class="card glass grid-span-2">
+                <div class="card-header">
+                    <h2>粉丝数与互动转化表现散点图</h2>
+                </div>
+                <div class="chart-container large" id="scatter-chart" aria-label="Scatter plot for followers vs interactions"></div>
+            </div>
+        </div>
+
+        <!-- 作品详情列表 -->
+        <section id="video-detail-section" class="detail-section card glass">
+            <div class="card-header detail-header">
+                <h2>作品详情列表</h2>
+                <span id="detail-count" class="detail-count hidden"></span>
+            </div>
+
+            <!-- Loading 骨架屏 -->
+            <div id="detail-skeleton" class="skeleton-wrap hidden">
+                <div class="skeleton-row" aria-hidden="true">
+                    <div class="skeleton-block w60"></div>
+                    <div class="skeleton-block w30"></div>
+                    <div class="skeleton-block w20"></div>
+                </div>
+                <div class="skeleton-row" aria-hidden="true">
+                    <div class="skeleton-block w50"></div>
+                    <div class="skeleton-block w40"></div>
+                    <div class="skeleton-block w20"></div>
+                </div>
+                <div class="skeleton-row" aria-hidden="true">
+                    <div class="skeleton-block w70"></div>
+                    <div class="skeleton-block w20"></div>
+                    <div class="skeleton-block w30"></div>
+                </div>
+            </div>
+
+            <!-- 空态 -->
+            <div id="detail-empty" class="detail-empty hidden">
+                <span>🎬</span>
+                <p>暂无作品数据，请先触发搜索抓取</p>
+            </div>
+
+            <!-- 列表容器 -->
+            <div id="video-list" class="video-list" role="list"></div>
+        </section>
+    </div>
+
+    <script src="./app.js"></script>
+</body>
+</html>
