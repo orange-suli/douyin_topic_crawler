@@ -1,3 +1,10 @@
+import sys
+import asyncio
+
+# 针对 Windows 系统的 Playwright 异步子进程兼容性修复
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -7,12 +14,7 @@ from backend.spider import run_spider
 from backend.database import export_to_excel
 import sqlite3
 import os
-import asyncio
 import json
-import sys
-
-if sys.platform == "win32":
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 app = FastAPI(title="Douyin Scrawl API", version="1.0.0", description="API Agent for serving cleaned datapanel data.")
 
@@ -24,6 +26,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_event():
+    loop = asyncio.get_running_loop()
+    print(f"  [STARTUP] Current Event Loop: {type(loop)}")
+    if sys.platform == "win32":
+        # 如果依然不是 Proactor，则在运行时发出警告
+        from asyncio.windows_events import ProactorEventLoop
+        if not isinstance(loop, ProactorEventLoop):
+            print("  [WARNING] Windows ProactorEventLoop not in use! Playwright may fail.")
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "douyin_data.db")
 
@@ -139,6 +151,7 @@ def fetch_stats_query(keyword: str = None):
             cursor.execute(f"SELECT tags FROM videos {tag_where}")
         tags_rows = cursor.fetchall()
         tag_counts = {}
+        tag_cooccurrence = {}
         for row in tags_rows:
             tags_str = row['tags']
             if isinstance(tags_str, str):
@@ -151,8 +164,30 @@ def fetch_stats_query(keyword: str = None):
                     # 降级处理为普通逗号分隔的字符串解析
                     tags_list = [t.strip() for t in tags_str.split(',') if t.strip()]
                 
-                for tag in tags_list:
+                # 去重清洗，避免同一个视频里出现相同的两个标签导致自我关联
+                tags_list = list(set([t for t in tags_list if t]))
+                
+                for i in range(len(tags_list)):
+                    tag = tags_list[i]
                     tag_counts[tag] = tag_counts.get(tag, 0) + 1
+                    # 构建共现矩阵
+                    for j in range(i + 1, len(tags_list)):
+                        t1, t2 = sorted([tag, tags_list[j]])
+                        pair = f"{t1}|||{t2}"
+                        tag_cooccurrence[pair] = tag_cooccurrence.get(pair, 0) + 1
+                        
+        # 组装共现网络数据 (限制前 50 个核心节点以免过于拥挤)
+        sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:50]
+        top_tags = {t[0] for t in sorted_tags}
+        
+        nodes = [{"name": t, "value": count, "symbolSize": min(count * 5 + 10, 50)} for t, count in sorted_tags]
+        links = []
+        for pair, weight in tag_cooccurrence.items():
+            t1, t2 = pair.split("|||")
+            if t1 in top_tags and t2 in top_tags and weight > 0:
+                links.append({"source": t1, "target": t2, "value": weight})
+        
+        network_data = {"nodes": nodes, "links": links}
                     
         # 3. 粉丝数与互动率的散点图 (粉丝数 vs 包含点赞评论分享汇总的互动率)
         scatter_sql = """
@@ -184,10 +219,25 @@ def fetch_stats_query(keyword: str = None):
                     "total_interaction": total_interact
                 })
 
+        # 4. 加权爆款指数 TOP 10 (水平柱状图)
+        # 权重: digg*1, collect*2, comment*5, share*10
+        viral_sql = f"""
+            SELECT 
+                desc AS title,
+                (IFNULL(digg_count, 0) * 1 + IFNULL(collect_count, 0) * 2 + IFNULL(comment_count, 0) * 5 + IFNULL(share_count, 0) * 10) as viral_score
+            FROM videos {where_clause}
+            ORDER BY viral_score DESC
+            LIMIT 10
+        """
+        cursor.execute(viral_sql, where_args)
+        viral_data = [dict(row) for row in cursor.fetchall()]
+
         return {
             "interaction_bar": interaction_bar,
             "tag_cloud": tag_counts,
-            "scatter_data": scatter_data
+            "scatter_data": scatter_data,
+            "viral_data": viral_data,
+            "network_data": network_data
         }
 
 # ---- ---- 异步 API 路由 ---- ----
@@ -290,4 +340,5 @@ if os.path.isdir(_FRONTEND_DIR):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
+    # 显式使用 asyncio 循环
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, loop="asyncio")

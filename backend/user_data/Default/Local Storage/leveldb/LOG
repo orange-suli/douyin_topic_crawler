@@ -1,5 +1,5 @@
-2026/04/21-06:49:07.798 38d0 Reusing MANIFEST D:\codes\dgt\backend\user_data\Default\Local Storage\leveldb/MANIFEST-000001
-2026/04/21-06:49:07.805 38d0 Recovering log #31
-2026/04/21-06:49:07.805 38d0 Level-0 table #33: started
-2026/04/21-06:49:07.811 38d0 Level-0 table #33: 41510 bytes OK
-2026/04/21-06:49:07.814 38d0 Delete type=0 #31
+2026/04/21-08:37:04.329 4c50 Reusing MANIFEST D:\codes\dgt\backend\user_data\Default\Local Storage\leveldb/MANIFEST-000001
+2026/04/21-08:37:04.337 4c50 Recovering log #27
+2026/04/21-08:37:04.338 4c50 Level-0 table #30: started
+2026/04/21-08:37:04.343 4c50 Level-0 table #30: 41550 bytes OK
+2026/04/21-08:37:04.346 4c50 Delete type=0 #27

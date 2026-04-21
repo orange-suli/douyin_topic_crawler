@@ -16,6 +16,8 @@
 | 🗄️ **结构化入库** | Pandas 数据清洗（`1.2w` → `12000`）+ SQLite 线程安全写入，杜绝脏数据 |
 | ⚡ **异步 FastAPI** | 全 `async/await` 架构，`asyncio.to_thread` 卸载 SQLite 阻塞，支持高并发 |
 | 📊 **动态看板** | ECharts 5 驱动：互动柱状图 + 标签词云图 + 粉丝-互动率散点图，完全前后端解耦 |
+| 🔥 **加权爆款得分榜** | 对点赞/收藏/评论/转发赋予差异化权重，计算综合 Viral Score，识别高粘性内容 |
+| 🕸️ **话题生态图谱** | 基于标签共现矩阵（Co-occurrence Matrix）与力导向图（Force-Directed Graph）可视化标签关联策略 |
 | 🔄 **一键抓取刷新** | 前端控制面板直接触发 `POST /api/crawl`，完成后自动刷新全部图表 |
 | ✅ **自动化 QA** | `test_runner.py` 覆盖多关键词回归测试与 `limit` 边界值精确断言 |
 | 📅 **Excel 导出** | 支持一键导出结构化数据报表（.xlsx），自动映射中文字段，包含完整互动指标 |
@@ -137,8 +139,10 @@ playwright install chromium
 ```bash
 # 在项目根目录下执行（必须激活 douyin-scrawl 环境）
 conda activate douyin-scrawl
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+python -m backend.main
 ```
+
+> **注意**：使用 `python -m backend.main` 启动可确保在 Windows 下强制使用 `ProactorEventLoop`，保证 Playwright 子进程正常工作。若使用 `uvicorn` CLI 启动，Windows 下可能出现异步事件循环兼容性问题。
 
 服务启动后，FastAPI 同时提供：
 - **REST API**：`http://localhost:8000/api/`
@@ -186,7 +190,7 @@ python test_runner.py
 | `POST` | `/api/crawl` | 触发抓取流水线（爬取 → 清洗 → 入库），Body: `{ keyword, limit }` |
 | `GET` | `/api/videos` | 获取视频列表，支持 `keyword`、`skip`、`limit` 分页参数 |
 | `GET` | `/api/videos/detailed` | 获取视频详情列表（含 `video_url`、标签数组、粉丝数） |
-| `GET` | `/api/stats` | 获取看板聚合数据（互动柱状、标签词云、散点图），支持 `keyword` 筛选 |
+| `GET` | `/api/stats` | 获取看板聚合数据（互动柱状、标签词云、散点图、加权爆款 TOP10、标签共现网络），支持 `keyword` 筛选 |
 | `GET` | `/api/download/{keyword}` | 导出并下载指定关键词（或 `all`）的结构化 Excel 数据报表 |
 
 完整交互式文档请访问：`http://localhost:8000/docs`

@@ -1,5 +1,14 @@
-2026/04/21-06:47:53.990 466c Reusing MANIFEST D:\codes\dgt\backend\user_data\Default\Local Storage\leveldb/MANIFEST-000001
-2026/04/21-06:47:53.996 466c Recovering log #28
-2026/04/21-06:47:53.997 466c Level-0 table #30: started
-2026/04/21-06:47:54.002 466c Level-0 table #30: 41451 bytes OK
-2026/04/21-06:47:54.005 466c Delete type=0 #28
+2026/04/21-08:35:19.124 6568 Reusing MANIFEST D:\codes\dgt\backend\user_data\Default\Local Storage\leveldb/MANIFEST-000001
+2026/04/21-08:35:19.137 6568 Recovering log #24
+2026/04/21-08:35:19.138 6568 Level-0 table #26: started
+2026/04/21-08:35:19.147 6568 Level-0 table #26: 41735 bytes OK
+2026/04/21-08:35:19.181 6568 Delete type=0 #24
+2026/04/21-08:35:19.202 6568 Compacting 4@0 + 1@1 files
+2026/04/21-08:35:19.214 6568 Generated table #28@0: 33 keys, 24469 bytes
+2026/04/21-08:35:19.214 6568 Compacted 4@0 + 1@1 files => 24469 bytes
+2026/04/21-08:35:19.215 6568 compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/04/21-08:35:19.216 6568 Delete type=2 #15
+2026/04/21-08:35:19.216 6568 Delete type=2 #17
+2026/04/21-08:35:19.217 6568 Delete type=2 #20
+2026/04/21-08:35:19.217 6568 Delete type=2 #23
+2026/04/21-08:35:19.217 6568 Delete type=2 #26

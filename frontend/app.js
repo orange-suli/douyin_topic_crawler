@@ -240,6 +240,132 @@ function renderScatterChart(scatterData) {
     myChart.setOption(option);
 }
 
+// 4. Render Viral Score Horizontal Bar Chart
+function renderViralChart(data) {
+    const containerId = 'viral-chart';
+    if (!data || data.length === 0) {
+        renderNoData(containerId);
+        return;
+    }
+    removeNoData(containerId);
+
+    const chartDom = document.getElementById(containerId);
+    let myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom, 'dark');
+    if (!chartInstances.includes(myChart)) chartInstances.push(myChart);
+
+    // Echarts array is bottom-up, so we reverse to put highest score on top
+    const sortedData = [...data].reverse();
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            formatter: function (params) {
+                return `${params[0].name}<br/>爆款得分: ${fmtNum(params[0].value)}`;
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '8%',
+            bottom: '3%',
+            top: '5%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)', type: 'dashed' } }
+        },
+        yAxis: {
+            type: 'category',
+            data: sortedData.map(item => item.title.length > 15 ? item.title.substring(0, 15) + '...' : item.title),
+            axisTick: { alignWithLabel: true },
+            axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
+            axisLabel: { color: '#fff', interval: 0 }
+        },
+        series: [
+            {
+                name: '爆款得分',
+                type: 'bar',
+                data: sortedData.map(item => item.viral_score),
+                label: { show: true, position: 'right', color: '#fff', formatter: (p) => fmtNum(p.value) },
+                itemStyle: {
+                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                        { offset: 0, color: '#ff0844' },
+                        { offset: 1, color: '#ffb199' }
+                    ]),
+                    borderRadius: [0, 4, 4, 0]
+                }
+            }
+        ]
+    };
+    myChart.setOption(option);
+}
+
+// 5. Render Tag Co-occurrence Network Graph
+function renderNetworkChart(data) {
+    const containerId = 'network-chart';
+    if (!data || !data.nodes || data.nodes.length === 0) {
+        renderNoData(containerId);
+        return;
+    }
+    removeNoData(containerId);
+
+    const chartDom = document.getElementById(containerId);
+    let myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom, 'dark');
+    if (!chartInstances.includes(myChart)) chartInstances.push(myChart);
+
+    const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            formatter: function(params) {
+                if (params.dataType === 'node') {
+                    return `标签: ${params.name}<br/>词频: ${params.value}`;
+                } else {
+                    return `共同出现: ${params.data.source} & ${params.data.target}<br/>共现次数: ${params.data.value}`;
+                }
+            }
+        },
+        animationDurationUpdate: 1500,
+        animationEasingUpdate: 'quinticInOut',
+        series: [{
+            type: 'graph',
+            layout: 'force',
+            force: {
+                repulsion: 300,
+                edgeLength: [30, 90],
+                gravity: 0.1
+            },
+            data: data.nodes,
+            links: data.links,
+            roam: true,
+            label: {
+                show: true,
+                position: 'right',
+                formatter: '{b}',
+                color: '#fff'
+            },
+            lineStyle: {
+                color: 'source',
+                curveness: 0.3,
+                opacity: 0.7
+            },
+            emphasis: {
+                focus: 'adjacency',
+                lineStyle: { width: 5 }
+            },
+            itemStyle: {
+                color: '#4facfe',
+                borderColor: '#00f2fe',
+                borderWidth: 1,
+                shadowBlur: 10,
+                shadowColor: 'rgba(0, 242, 254, 0.5)'
+            }
+        }]
+    };
+    myChart.setOption(option);
+}
+
 // Fetch Data & Initialize
 async function fetchAndRenderAll() {
     try {
@@ -258,6 +384,8 @@ async function fetchAndRenderAll() {
             renderBarChart(stats.interaction_bar);
             renderWordCloud(stats.tag_cloud);
             renderScatterChart(stats.scatter_data);
+            if (stats.viral_data) renderViralChart(stats.viral_data);
+            if (stats.network_data) renderNetworkChart(stats.network_data);
         } else {
             throw new Error('Invalid backend response format');
         }
@@ -268,6 +396,8 @@ async function fetchAndRenderAll() {
         renderNoData('bar-chart');
         renderNoData('wordcloud-chart');
         renderNoData('scatter-chart');
+        renderNoData('viral-chart');
+        renderNoData('network-chart');
     }
     // 始终同步刷新详情列表（无论图表是否成功）
     await fetchAndRenderDetailList();
