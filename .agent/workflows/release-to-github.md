@@ -1,12 +1,10 @@
 ---
-description: 自动更新文档与提交代码
+description: 正式版本发布
 ---
 
-# WORKFLOW: 自动更新文档与提交代码
-
-1. **同步文档**: 阅读最新的代码变更，自动更新 `README.md` 中的特性列表或启动指令。
-2. **冻结依赖**: 执行 `pip freeze > requirements.txt` 确保依赖列表是最新的。
-3. **提交代码**: 
-   - 自动执行 `git add .`
-   - 根据本次修改的内容，自动生成一段符合 Conventional Commits 规范的 Git 提交信息并执行 commit。
-4. **推送到云端**: 执行 `git push origin main`。
+# WORKFLOW: 正式版本发布
+1. **切回主线**: 执行 `git checkout main`。
+2. **合并代码**: 执行 `git merge [功能分支名]`。
+3. **文档同步**: 让 Doc Agent 自动更新 README 的版本号。
+4. **推送主线**: 执行 `git push origin main`。
+5. **清理**: 执行 `git branch -d [功能分支名]`。
